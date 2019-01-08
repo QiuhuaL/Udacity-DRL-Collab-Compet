@@ -85,8 +85,7 @@ class Agent():
         self.time_step += 1
         if len(self.memory) > BATCH_SIZE and self.time_step % UPDATE_EVERY == 0:
            self.learn(GAMMA)
-        self.noise_weight *= NOISE_WEIGHT_DECAY
-
+        
     def act(self, states, add_noise=True):
         """Returns actions for given state as per current policy."""
         # for multiple agents
