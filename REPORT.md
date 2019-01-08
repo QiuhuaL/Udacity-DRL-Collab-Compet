@@ -39,7 +39,7 @@ The DDPG algorithm is shown below(from the DDPG paper mentioned above):
 ###  The Multi-Agent Deep Deterministic Policy Gradient (MADDPG)
 As illustrated in the diagram below, the MADDPG method adopts a framework of centralized training with decentralized execution, allowing the policies
 to use extra information to ease training, and this extra information is not used at test time.  Specifically, MADDPG learns different DDPG agents for the different actors, but only learns a shared centralized critic network based on the observations and actions of all agents. This method is applicable not only to cooperative but to competitive or mixed cooperative-competitive environments.      
-![MADDPG illustration](images/MADDPG_illustration1.PNG) 
+![MADDPG illustration](images/MADDPG_illustration1.png
 
 The algorithm of MADDPG is shown below: 
 ![MADDPG algorithm](images/MADDPG_algorithm.PNG) 
