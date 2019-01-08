@@ -98,7 +98,9 @@ theta = 0.15
 sigma=0.1
 ```
 ###  The Results
-I run the MADDPG trainining multiple times with different random seeds. Result from one  example run is shown here, where the target score was reached in 1785 episodes. Here is a screen shot of the trainning score output from `tennis.ipynb` for this run.
+I run the MADDPG trainining multiple times with different random seeds. 
+
+(1) Run 1: Result from example run 1 is shown below, where the target score was reached in 1785 episodes. Here is a screen shot of the trainning score output from `tennis.ipynb` for this run.
 
 ![Target Score ](images/target_score_run1.png)
 
@@ -109,6 +111,18 @@ In the following plot, the mean score averaged over 100 continuous episodes of m
 The best score of 1.90 was reached at episode 2082 during this training run.
   
 The Actors and Critic networks after reaching the target score were saved in the folder `model_saved_run1\`, with the file names `solved_checkpoint_actor1.pth` , `solved_checkpoint_actor2.pth` and `solved_checkpoint_critic.pth`, and the models with the best score during training were saved in the files `bestscore_checkpoint_actor1.pth`, `bestscore_checkpoint_actor2.pth` and `bestscore_checkpoint_critic.pth`.   
+
+(2) Example run 2, the target score was reached in 1212 episodes.  Here is a screen shot of the trainning score output from `tennis.ipynb` for this run.
+
+![Target Score ](images/target_score_run2.png)
+
+The training score plot for this run is shown below. For this run, the training was did for 5000 episodes, the best score 2.28 was reached in 2849 episodes.  
+ 
+![The mean max score over 100 consecutive episodes](images/scores_run2.png)
+
+The Actors and Critic networks after reaching the target score were saved in the folder `model_saved_run2\`, with the file names `solved_checkpoint_actor1.pth` , `solved_checkpoint_actor2.pth` and `solved_checkpoint_critic.pth`, and the models with the best score during training were saved in the files `bestscore_checkpoint_actor1.pth`, `bestscore_checkpoint_actor2.pth` and `bestscore_checkpoint_critic.pth`.
+
+The detailed output from the training was saved in the Jupyter notebook `Tennis.ipydb`.    
 
 ### Possible Improvements
 
