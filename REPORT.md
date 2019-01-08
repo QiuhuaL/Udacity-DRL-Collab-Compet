@@ -54,7 +54,8 @@ he MADDPG code implemented for this project is based on the DDPG code for the co
 
 #### The MADDPG Parameters 
 
-Most of the parameters of the MADDPG agent remains the same as those in the DDPG agent for the continuous control project. What is diffenrent is that instead of updating the network every time step, the MADDPG agent is updated every 2 time steps. Also, a noise decay factor is used to gradually reduce the weight of the noise added to the actions.        
+Most of the parameters of the MADDPG agent remains the same as those in the DDPG agent for the continuous control project. What is diffenrent is that instead of updating the network every time step, the MADDPG agent is updated every 2 time steps. 
+
 The MADDPG agent has the following parameter values:
 ```
 BUFFER_SIZE = int(1e6)  # replay buffer size
@@ -65,8 +66,6 @@ LR_ACTOR = 1e-4         # learning rate of the actor
 LR_CRITIC = 1e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
 UPDATE_EVERY = 2        # Frequency to update the networks (how many time steps to update once)
-NOISE_WEIGHT_START = 1.0  # Initial noise weighting factor
-NOISE_WEIGHT_DECAY = 0.9999  # Rate of noise weighting factor decay
 ```
 
 Compared to the DDPG Neural Networks for the continuous control project, both the Actor networks and and critic networks have more layers and a batch normalization layer is also added after the first fully connected layer.
@@ -125,11 +124,17 @@ The Actors and Critic networks after reaching the target score were saved in the
 ### Possible Improvements
 
 There are multiple ways that could potentially improve the performance of the MADDPG architecture:
+ -  Expriement with different layers of Nueral networks for the actors and critic.    
+ -  Add a noise decay factor to gradually reduce the weight of the noise added to the actions later in the training process. 
  -  Further tune the parameters
- -  Use prioritized experience play
+ -  Use prioritized experience play to learn more efficiently
+ 
+ What I would like to do next:
+ -  Try the MADDPG algorithm on the optional project with [multi-agent soccer environment](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md). 
+ - Explore the following policy based architectures and see how they could be applied to the multi-agent environments:
   
-The following policy based architectures could also potentially increase the performance, which I would like to explore next:
-
-- [PPO](https://arxiv.org/pdf/1707.06347.pdf), Proximal Policy Optimization, a stochastic policy gradient method.
-- [A3C](https://arxiv.org/pdf/1602.01783.pdf), an asynchronous gradient descent variant of the actor-critic method.
-- [D4PG](https://openreview.net/pdf?id=SyZipzbCb), the distributed distributional deep deterministic policy gradient method. 
+   [PPO](https://arxiv.org/pdf/1707.06347.pdf), Proximal Policy Optimization, a stochastic policy gradient method
+  
+   [A3C](https://arxiv.org/pdf/1602.01783.pdf), an asynchronous gradient descent variant of the actor-critic method.
+  
+   [D4PG](https://openreview.net/pdf?id=SyZipzbCb), the distributed distributional deep deterministic policy gradient method. 
