@@ -1,63 +1,60 @@
-[//]: # (Image References)
+[image1]: https://user-images.githubusercontent.com/10624937/42135623-e770e354-7d12-11e8-998d-29fc74429ca2.gif "Trained Agent"
+[image2]: https://user-images.githubusercontent.com/10624937/42135622-e55fb586-7d12-11e8-8a54-3c31da15a90a.gif "Soccer"
 
-[image1]: https://user-images.githubusercontent.com/10624937/43851024-320ba930-9aff-11e8-8493-ee547c6af349.gif "Trained Agent"
-[image2]: https://user-images.githubusercontent.com/10624937/43851646-d899bf20-9b00-11e8-858c-29b5c2c94ccc.png "Crawler"
-
-
-# Project 2: Continuous Control
+# Project 3: Collaboration and Competition
 
 ### Introduction
 
-For this project, we  with the [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) environment.
+For this project, we work with the Unity [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment.
 
 ![Trained Agent][image1]
 
-In this environment, a double-jointed arm can move to target locations. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. Thus, the goal of your agent is to maintain its position at the target location for as many time steps as possible.
+In this environment, two agents control rackets to bounce a ball over a net. If an agent hits the ball over the net, it receives a reward of +0.1.  If an agent lets a ball hit the ground or hits the ball out of bounds, it receives a reward of -0.01.  Thus, the goal of each agent is to keep the ball in play.
 
-The observation space consists of 33 variables corresponding to position, rotation, velocity, and angular velocities of the arm. Each action is a vector with four numbers, corresponding to torque applicable to two joints. Every entry in the action vector should be a number between -1 and 1.
+The observation space consists of 8 variables corresponding to the position and velocity of the ball and racket. Each agent receives its own, local observation.  Two continuous actions are available, corresponding to movement toward (or away from) the net, and jumping. 
 
-### Distributed Training
+The task is episodic, and in order to solve the environment, your agents must get an average score of +0.5 (over 100 consecutive episodes, after taking the maximum over both agents). Specifically,
 
-For this project, two separate versions of the Unity environment was provided by Udacity:
-- The first version contains a single agent.
-- The second version contains 20 identical agents, each with its own copy of the environment.  
+- After each episode, we add up the rewards that each agent received (without discounting), to get a score for each agent. This yields 2 (potentially different) scores. We then take the maximum of these 2 scores.
+- This yields a single **score** for each episode.
+
+The environment is considered solved, when the average (over 100 episodes) of those **scores** is at least +0.5.
 
 ## Implementation
-For this project, the second version with 20 idential agents was chosen to be solved. 
+For this project, the Multi-Agent Deep Deterministic Policy Gradient (MADDPG) as described in the paper [Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments](https://arxiv.org/abs/1706.02275) was implemented. Since MADDPG algorithm is based on [DDPG (Deep Deterministic Policy Gradient)](https://arxiv.org/abs/1509.02971), we will first briefly introduce the DDPG algorithm. 
 
-###  The Deep Deterministic Policy Gradient (DDPG)
-
-This project implements the DDPG (Deep Deterministic Policy Gradient) method for continuous action-space, as described in the  paper [Continuous control with deep reinforcement learning](https://arxiv.org/abs/1509.02971). The algorithm is shown below (copied from the paper):
-
-![DDPG Algorithm](images/DDPG_algorithm.PNG) 
-
-This method is an "Actor-Critic" method, which includes two deep neural networks,one is called the Actor and the other the Critic, where the Actor is used to approximate the optimal policy deterministically, and the Critic is used to evaluate the optimal action value by using the actor's best believed action.     
-could be classified as a DQN method for continuous action space.  The Actor is used as an approximate maximizer to calculate the new target value for training the action value function much in the way [DQN (the Deep Q-Networks)](https://storage.googleapis.com/deepmind-media/dqn/DQNNaturePaper.pdf) does. 
-
-InDQN, we have two copies of the network weights, the regular and the target network.In the DDPG, we have two copies of the network weights for each of the Actor and Critic networks, a regular and target network for the Actor and a regular and target network for the Critic.
+###  Deep Deterministic Policy Gradient (DDPG)
+DDPG is a off-policy "Actor-Critic" method, which includes two deep neural networks,one is called the Actor and the other the Critic, where the Actor is used to approximate the optimal policy deterministically, and the Critic is used to evaluate the optimal action value by using the actor's best believed action. 
+In DDPG, we have two copies of the network weights for each of the Actor and Critic networks, a regular and target network for the Actor and a regular and target network for the Critic.
 
 Two interesting aspects of the DDPG are:
-  - Experience repay with the replay buffer: This is the same as DQN.
+  - Experience replay with the replay buffer: Exprience replay helps to break the harmful correlations between expriences and also allows us to learn more from individual tuples multiple times, recall rare occurrences, and in general make better use of our experience.
   
-  - Soft Updates: This is different from the original DQN, in which the target network is updated much less frequently than the regular network (copied from the regular network every 10,000 time steps) ; In DDPG, for each time step, we mix 0.01% of regular network weights with the target network weights. The soft update strategy leads to faster convergence in practice and could be applied to any method that uses a target network, includes the DQN.  
+  - Soft Updates: for each time step, we mix 0.01% of regular network weights with the target network weights. The soft update strategy leads to faster convergence in practice and could be applied to any method that uses a target network, includes the DQN.  
+
+The DDPG algorithm is shown below(from the DDPG paper mentioned above):
+
+![DDPG Algorithm](images\DDPG_algorithm.PNG) 
  
+###  The Multi-Agent Deep Deterministic Policy Gradient (MADDPG)
+As illustrated in the diagram below, the MADDPG method adopts a framework of centralized training with decentralized execution, allowing the policies
+to use extra information to ease training, and this extra information is not used at test time.  Specifically, MADDPG learns different DDPG agents for the different actors, but only learns a shared centralized critic network based on the observations and actions of all agents. This method is applicable not only to cooperative but to competitive or mixed cooperative-competitive environments.      
+![MADDPG illustration](images\MADDPG_illustration.PNG) 
 
-During training, at each time step, noise is added that sampled from [The Ornstein-Uhlenbeck process](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process) was added to the action outputted from the actor networks.  
+The algorithm of MADDPG is shown below: 
+![MADDPG algorithm](images\MADDPG_algorithm.PNG) 
+  
+### The Python Code
+he MADDPG code implemented for this project is based on the DDPG code for the continuous control project. The following are the files:
 
-### The Python Code 
+- model.py: In this Python file, the deep Neural Network models of the actors and the critic are defined.
+- mddpg_agent.py: In this Python file, the DQN agent class and a Replay Buffer memory used by the DQN are defined.
+- tennis.ipynb: It is the main routine Jupyter notebook file that trains the MADDPG agent, plots the training scores.
 
-The code implemented for this project is based on the [DDPG code for the pendulum example](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-pendulum) in the Deep Reinforcement Learning Nanodegree. The following are the files:
+#### The MADDPG Parameters 
 
-- model.py: In this Python file, the deep Neural Network models are defined. 
-- ddpg_agent.py:  In this Python file, the DQN agent class and a Replay Buffer memory used by the DQN are defined.
-- Continuous_Control.ipynb:  It is the main routine Jupyter notebook file that trains the DDPG agent.
-
-### The DDPG Parameters 
-
-I experimented with different combinations of the DDPG parameters, especially the buffer size, the batch size, and the learning rate of the Actor and Critic networks, and the paramters for the Ornstein-Uhlenbeck process. I found that the sigma value of the Ornstein-Uhlenbeck process is very important for the results. Also, the random seed could affect the training too.
-
-The DDPG agent has the following parameter values:
-
+Most of the parameters of the MADDPG agent remains the same as those in the DDPG agent for the continuous control project. What is diffenrent is that instead of updating the network every time step, the MADDPG agent is updated every 2 time steps. Also, a noise decay factor is used to gradually reduce the weight of the noise added to the actions.        
+The MADDPG agent has the following parameter values:
 ```
 BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 128        # minibatch size
@@ -66,23 +63,31 @@ TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
+UPDATE_EVERY = 2        # Frequency to update the networks (how many time steps to update once)
+NOISE_WEIGHT_START = 1.0  # Initial noise weighting factor
+NOISE_WEIGHT_DECAY = 0.9999  # Rate of noise weighting factor decay
 ```
 
-The Actor Neural Networks have three fully connected layers:
+Compared to the DDPG Neural Networks for the continuous control project, both the Actor networks and and critic networks have more layers and a batch normalization layer is also added after the first fully connected layer.
+
+The Actor Neural Networks have 4 fully connected layers and 1 batch normalization layer:
 
 ```
-The size of input nodes is 33, which is the size of the state
-A fully Connected Layer (400 nodes, Relu activation)
-A Fully Connected Layer (300 nodes, Relu activation) 
-A fully connectted layer (4 output nodes, which is the size of the actions, Tanh aciviation for continous action)
+The size of input nodes is 24, which is the size of the state
+A fully Connected Layer (512 nodes, Relu activation)
+A Batch Normalization Layer (512 nodes)
+A Fully Connected Layer (256 nodes, Relu activation) 
+A Fully Connected Layer (64 nodes, Relu activation) 
+A fully connectted layer (2 output nodes, which is the size of the actions, Tanh aciviation for continous actions)
 ```
 
-The Critic Neural Networks have three fully connected layers:
+The Critic Neural Networks also have 4 fully connected layers and 1 batch normalization layer
 
 ```
-The size of input nodes is 33, which is the size of the state
-A fully Connected Layer (400 nodes, Relu activation)
-A Fully Connected Layer (333 nodes, that is 300 + the size of the action, which is 33, Relu activation) 
+The size of input nodes is (24+2) * 2 , which is (state size + action size) *2 
+A fully Connected Layer (512 nodes, Relu activation)
+A Fully Connected Layer (256 nodes, Relu activation)
+A Fully Connected Layer (64 nodes, Relu activation) 
 A fully connectted layer (1 output node for action value)
 ```
 
@@ -93,23 +98,34 @@ theta = 0.15
 sigma=0.1
 ```
 ###  The Results
-The mean score averaged over 100 continuous episodes and over all the 20 agents from the training process is shown below, which shows that the DDPG reached the target score of 30 in 122 episodes.
+The agent was run several times with different random seeds. The results of two example runs are shown here.
+
+(1) Example run 1, the target score was reached in 1785 episodes. Here is a screen shot of the trainning score output from `tennis.ipynb` for this run.
+
+![Target Score ](images/target_score_run1.png)
+
+
+In the following plot, the mean score averaged over 100 continuous episodes of maximum scores between the two agents is shown, where the cyan and green dotted lines show the scores of the two agents in each episode, and the blue dots shows the maximum scores of those two agents, and the red line shows the maximum scores averaged over 100 continuous episodes.  
  
-[The mean score averaged over 100 consecutive episodes and over all agents](images/training.txt)
+![The mean max score over 100 consecutive episodes](images/scores_run1.png)
 
-In the following figure, the scores for every agent, every episode was shown as blue *, the the mean score over all 20 agents was shown in green line, and the mean score averaged over 100 consecutive episodes, and over all agents was shown in red line. 
+The Actors and Critic networks after reaching the target score were saved in the folder `model_saved_run1\`, with the file names `solved_checkpoint_actor1.pth` , `solved_checkpoint_actor2.pth` and `solved_checkpoint_critic.pth`, and the models with the best score during training were saved in the files `bestscore_checkpoint_actor1.pth`, `bestscore_checkpoint_actor2.pth` and `bestscore_checkpoint_critic.pth`.   
 
-![Score evolution during the training](images/scores.png)
+(2) Example run 2, the target score was reached in 1212 episodes.  Here is a screen shot of the trainning score output from `tennis.ipynb` for this run.
 
-The Actor and Critic networks after reaching the target score were saved in the file `checkpoint_actor.pth` and `checkpoint_critic.pth`
+![Target Score ](images/target_score_run2.png)
+
+The training score plot for this run is shown below.
+ 
+![The mean max score over 100 consecutive episodes](images/scores_run2.png)
+
+The Actors and Critic networks after reaching the target score were saved in the folder `model_saved_run2\`, with the file names `solved_checkpoint_actor1.pth` , `solved_checkpoint_actor2.pth` and `solved_checkpoint_critic.pth`, and the models with the best score during training were saved in the files `bestscore_checkpoint_actor1.pth`, `bestscore_checkpoint_actor2.pth` and `bestscore_checkpoint_critic.pth`.   
 
 ### Possible Improvements
 
-There are multiple ways that could potentially improve the performance of the DDPG architecture:
+There are multiple ways that could potentially improve the performance of the MADDPG architecture:
  -  Further tune the parameters
  -  Use prioritized experience play
- -  Update the local networks every N steps instead of every step
-  
   
 The following policy based architectures could also potentially increase the performance, which I would like to explore next:
 
