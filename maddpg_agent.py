@@ -18,7 +18,7 @@ LR_CRITIC = 1e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
 UPDATE_EVERY = 2        # Frequency to update the networks (how many time steps to update once)
 NOISE_WEIGHT_START = 1.0  # Initial noise weighting factor
-NOISE_WEIGHT_DECAY = 0.99  # Rate of noise weighting factor decay
+NOISE_WEIGHT_DECAY = 0.9999  # Rate of noise weighting factor decay
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
